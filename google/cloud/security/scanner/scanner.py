@@ -76,7 +76,10 @@ OUTPUT_TIMESTAMP_FMT = '%Y%m%dT%H%M%SZ'
 
 def main(_):
     """Run the scanner."""
+    snapshot_timestamp = _get_timestamp()
+    run(snapshot_timestamp=snapshot_timestamp)
 
+def run(snapshot_timestamp=None):
     LOGGER.info('Initializing the rules engine:\nUsing rules: %s', FLAGS.rules)
 
     if not FLAGS.rules:
@@ -87,7 +90,6 @@ def main(_):
     rules_engine = IamRulesEngine(rules_file_path=FLAGS.rules)
     rules_engine.build_rule_book()
 
-    snapshot_timestamp = _get_timestamp()
     if not snapshot_timestamp:
         LOGGER.warn('No snapshot timestamp found. Exiting.')
         sys.exit()

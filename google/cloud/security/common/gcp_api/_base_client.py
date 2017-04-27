@@ -17,32 +17,66 @@
 from apiclient import discovery
 from oauth2client.client import GoogleCredentials
 from retrying import retry
+from googleapiclient import errors as googleapi_errors
 
 from google.cloud.security.common.gcp_api import _supported_apis
-from google.cloud.security.common.gcp_api import errors as api_errors
 from google.cloud.security.common.util import retryable_exceptions
+from google.cloud.security.common.util import log_util
+
+LOGGER = log_util.get_logger(__name__)
+
 
 # pylint: disable=too-few-public-methods
 class BaseClient(object):
     """Base client for a specified GCP API and credentials."""
 
-    def __init__(self, credentials=None, **kwargs):
+    def __init__(self, credentials=None, api_name=None, **kwargs):
+        """Thin client wrapper over the Google Discovery API.
+
+        The intent for this class is to define the Google APIs expected by
+        Forseti. While other APIs and versions can be specified, it may not
+        be stable and could cause unknown issues in Forseti.
+
+        Args:
+            credentials: Google credentials for auth-ing to the API.
+            api_name: The API name to wrap. More details here:
+                https://developers.google.com/api-client-library/python/apis/
+            kwargs: Additional args such as version.
+
+        Raise:
+            googleapiclient.errors.UnknownApiNameOrVersion if API or version
+            is not known in the Google Discovery API.
+        """
         if not credentials:
             credentials = GoogleCredentials.get_application_default()
         self._credentials = credentials
-        if not kwargs or not kwargs.get('api_name'):
-            raise api_errors.UnsupportedApiError(
-                'Unsupported API {}'.format(kwargs))
-        self.name = kwargs['api_name']
-        if not _supported_apis.SUPPORTED_APIS[self.name] or \
-            not _supported_apis.SUPPORTED_APIS[self.name]['version']:
-            raise api_errors.UnsupportedApiVersionError(
-                'Unsupported version {}'.format(
-                    _supported_apis.SUPPORTED_APIS[self.name]))
-        self.version = _supported_apis.SUPPORTED_APIS[self.name]['version']
-        self.service = discovery.build(self.name, self.version,
+
+        self.name = api_name
+
+        # Look to see if the API is formally supported in Forseti.
+        supported_api = _supported_apis.SUPPORTED_APIS.get(api_name)
+        if not supported_api:
+            LOGGER.warn('API "%s" is not formally supported in Forseti, '
+                        'proceed at your own risk.', api_name)
+
+        # See if the version is supported by Forseti.
+        # If no version is specified, try to find the supported API's version.
+        version = kwargs.get('version')
+        if not version and supported_api:
+            version = supported_api.get('version')
+        self.version = version
+
+        if supported_api and supported_api.get('version') != version:
+            LOGGER.warn('API "%s" version %s is not formally supported '
+                        'in Forseti, proceed at your own risk.',
+                        api_name, version)
+
+        should_cache_discovery = kwargs.get('cache_discovery')
+
+        self.service = discovery.build(self.name,
+                                       self.version,
                                        credentials=self._credentials,
-                                       cache_discovery=False)
+                                       cache_discovery=should_cache_discovery)
 
     def __repr__(self):
         return 'API: name={}, version={}'.format(self.name, self.version)
@@ -53,9 +87,8 @@ class BaseClient(object):
            wait_exponential_multiplier=1000, wait_exponential_max=10000,
            stop_max_attempt_number=5)
     # pylint: disable=no-self-use
-    # TODO: Investigate if this could be a standalone methods to remove disable.
     def _execute(self, request):
-        """Executes requests in a rate-limited way.
+        """Executes requests with exponential retry.
 
         Args:
             request: GCP API client request object.
@@ -65,7 +98,7 @@ class BaseClient(object):
 
         Raises:
             When the retry is exceeded, exception will be thrown.  This
-            exception is not wrapped by the retry library, and will be handled
+            exception is not wrapped by the retry library, and should be handled
             upstream.
         """
         return request.execute()

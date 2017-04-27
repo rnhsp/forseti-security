@@ -12,24 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""API errors."""
+"""Wrapper for PubSub API client."""
+
+from google.cloud.security.common.gcp_api import _base_client
 
 
-class Error(Exception):
-    """Base Error class."""
+# pylint: disable=too-few-public-methods
+class PubSubClient(_base_client.BaseClient):
+    """PubSub Client."""
 
+    API_NAME = 'pubsub'
 
-class ApiExecutionError(Error):
-    """Error for API executions."""
-
-    CUSTOM_ERROR_MESSAGE = 'GCP API Error: unable to get {0} from GCP:\n{1}'
-
-
-    def __init__(self, resource_name, e):
-        super(ApiExecutionError, self).__init__(
-            self.CUSTOM_ERROR_MESSAGE.format(resource_name, e))
-
-
-class InvalidBucketPathError(Error):
-    """Invalid GCS bucket path."""
-    pass
+    def __init__(self, credentials=None, version=None):
+        super(PubSubClient, self).__init__(
+            credentials=credentials, api_name=self.API_NAME, version=version)

@@ -19,6 +19,9 @@ discovery.get()).
 """
 
 SUPPORTED_APIS = {
+    'admin': {
+        'version': 'directory_v1'
+    },
     'cloudbilling': {
         'version': 'v1'
     },
@@ -31,10 +34,10 @@ SUPPORTED_APIS = {
     'iam': {
         'version': 'v1'
     },
-    'storage': {
+    'pubsub': {
         'version': 'v1'
     },
-    'admin': {
-        'version': 'directory_v1'
+    'storage': {
+        'version': 'v1'
     },
 }

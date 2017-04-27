@@ -21,11 +21,9 @@ import mock
 
 from google.apputils import basetest
 from google.cloud.security.common.gcp_api import _base_client
-from google.cloud.security.common.gcp_api import _supported_apis
 from google.cloud.security.common.gcp_api import cloud_resource_manager as crm
 from google.cloud.security.common.gcp_api import errors as api_errors
 from google.cloud.security.common.gcp_type.resource import LifecycleState
-from google.cloud.security.common.util import log_util
 from tests.common.gcp_type.test_data import fake_orgs
 
 

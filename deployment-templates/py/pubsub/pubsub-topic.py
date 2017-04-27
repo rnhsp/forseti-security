@@ -12,24 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""API errors."""
+"""Creates a PubSub topic for Forseti."""
 
 
-class Error(Exception):
-    """Base Error class."""
+def GenerateConfig(context):
+    """Generate configuration."""
 
+    resources = []
 
-class ApiExecutionError(Error):
-    """Error for API executions."""
+    resources.append({
+        'name': context.env['name'],
+        'type': 'pubsub.v1.topic',
+        'properties': {
+            'name': context.env['name'],
+            'topic': context.properties['topic-name'],
+        }
+    })
 
-    CUSTOM_ERROR_MESSAGE = 'GCP API Error: unable to get {0} from GCP:\n{1}'
-
-
-    def __init__(self, resource_name, e):
-        super(ApiExecutionError, self).__init__(
-            self.CUSTOM_ERROR_MESSAGE.format(resource_name, e))
-
-
-class InvalidBucketPathError(Error):
-    """Invalid GCS bucket path."""
-    pass
+    return {'resources': resources}

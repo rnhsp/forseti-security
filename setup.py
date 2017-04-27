@@ -40,6 +40,7 @@ INSTALL_REQUIRES = [
     'Jinja2==2.9.5',
     'MySQL-python==1.2.5',
     'protobuf==3.2.0',
+    'python-daemon==2.1.2',
     'PyYAML==3.12',
     'ratelimiter==1.1.0',
     'retrying==1.3.3',
@@ -79,6 +80,8 @@ setup(
     description='Forseti Security tools',
     author='Google Inc.',
     author_email='opensource@google.com',
+    license='Apache 2.0',
+    keywords='gcp google cloud platform security tools',
     url='https://github.com/GoogleCloudPlatform/forseti-security',
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -88,6 +91,7 @@ setup(
     cmdclass={
         'install': PostInstallCommand
     },
+    dependency_links=['https://github.com/cemsbr/python-daemon/tarball/latest_release#egg=python-daemon-2.1.2'],
     install_requires=SETUP_REQUIRES + INSTALL_REQUIRES,
     setup_requires=SETUP_REQUIRES,
     tests_require=INSTALL_REQUIRES + SETUP_REQUIRES + TEST_REQUIRES,
@@ -99,8 +103,6 @@ setup(
     },
     namespace_packages=NAMESPACE_PACKAGES,
     google_test_dir='tests',
-    license='Apache 2.0',
-    keywords='gcp google cloud platform security tools',
     entry_points={
         'console_scripts': [
             'forseti_inventory = google.cloud.security.stubs:RunForsetiInventory',
