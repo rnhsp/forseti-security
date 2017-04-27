@@ -17,7 +17,6 @@
 from apiclient import discovery
 from oauth2client.client import GoogleCredentials
 from retrying import retry
-from googleapiclient import errors as googleapi_errors
 
 from google.cloud.security.common.gcp_api import _supported_apis
 from google.cloud.security.common.util import retryable_exceptions
@@ -42,10 +41,6 @@ class BaseClient(object):
             api_name: The API name to wrap. More details here:
                 https://developers.google.com/api-client-library/python/apis/
             kwargs: Additional args such as version.
-
-        Raise:
-            googleapiclient.errors.UnknownApiNameOrVersion if API or version
-            is not known in the Google Discovery API.
         """
         if not credentials:
             credentials = GoogleCredentials.get_application_default()

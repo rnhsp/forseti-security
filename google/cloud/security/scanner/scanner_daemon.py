@@ -40,6 +40,8 @@ MAX_MESSAGES = 10
 
 
 def main(_):
+    """Run the scanner daemon."""
+
     if not FLAGS.subscription:
         LOGGER.info('No PubSub subscription to listen to. Exiting.')
         sys.exit(0)
@@ -53,7 +55,7 @@ def main(_):
     with daemon.DaemonContext():
         while True:
             # TODO: determine whether to run the scanner based on:
-            # 1. If current time exceeds the "next_scan" 
+            # 1. If current time exceeds the "next_scan"
             # 2. If the snapshot differs
             now = datetime.datetime.utcnow()
 
@@ -64,9 +66,9 @@ def main(_):
                 subscription_service, FLAGS.subscription)
 
             LOGGER.info('current snapshot: %s', curr_snapshot_timestamp)
-            if ((curr_snapshot_timestamp is not None and 
-                curr_snapshot_timestamp != prev_snapshot_timestamp) or
-                now > next_scan):
+            if ((now > next_scan) or
+                    (curr_snapshot_timestamp is not None and
+                     curr_snapshot_timestamp != prev_snapshot_timestamp)):
                 scanner.run(snapshot_timestamp=curr_snapshot_timestamp)
                 next_scan = _get_next_scan_time()
             prev_snapshot_timestamp = curr_snapshot_timestamp
@@ -74,10 +76,25 @@ def main(_):
             time.sleep(FLAGS.poll_interval)
 
 def _get_next_scan_time():
+    """Get the next scan time.
+
+    Returns:
+        The scan time, which is now + MAX_SCAN_INTERVAL, at the top of the hour.
+    """
     return datetime.datetime.utcnow().replace(
         minute=0, second=0, microsecond=0) + MAX_SCAN_INTERVAL
 
 def check_subscription(subscription_service, subscription_name):
+    """Check the PubSub subscription for new snapshot notifications.
+
+    Args:
+        subscription_service: The PubSub subscription service.
+        subscription_name: The full name of the PubSub subscription.
+
+    Returns:
+        The snapshot timestamp read from the subscription message, if any.
+    """
+
     # read from topic
     request = subscription_service.pull(
         subscription=subscription_name,
@@ -92,7 +109,7 @@ def check_subscription(subscription_service, subscription_name):
         for message in messages:
             ack_ids.append(message.get('ackId'))
             msg_content = message.get('message')
-            msg_attrs = msg_content.get('attributes')
+            _ = msg_content.get('attributes')
             msg_data = base64.b64decode(msg_content.get('data'))
             LOGGER.info('msg data: %s', msg_data)
 
