@@ -75,11 +75,19 @@ OUTPUT_TIMESTAMP_FMT = '%Y%m%dT%H%M%SZ'
 
 
 def main(_):
-    """Run the scanner."""
+    """Main function, called by app.run()."""
     snapshot_timestamp = _get_timestamp()
     run(snapshot_timestamp=snapshot_timestamp)
 
 def run(snapshot_timestamp=None):
+    """Run the scanner.
+
+    This is separate from main() because the runner will be called from the
+    daemon script.
+
+    Args:
+        snapshot_timestamp: The snapshot timestamp to use for scanning.
+    """
     LOGGER.info('Initializing the rules engine:\nUsing rules: %s', FLAGS.rules)
 
     if not FLAGS.rules:
