@@ -78,18 +78,21 @@ class Model(MODEL_BASE):
         """
 
         self.watchdog_timer = datetime.datetime.utcnow()
+        session.add(self)
         session.commit()
 
     def set_inprogress(self, session):
         """Set state to 'in progress'."""
 
         self.state = "INPROGRESS"
+        session.add(self)
         session.commit()
 
     def set_done(self, session):
         """Indicate a finished import."""
 
         self.state = "DONE"
+        session.add(self)
         session.commit()
 
 
