@@ -20,6 +20,7 @@ from google.cloud.security.scanner.scanners.iam_rules_scanner import IamPolicySc
 from google.cloud.security.scanner.scanners.bigquery_scanner import BigqueryScanner
 from google.cloud.security.scanner.scanners.bucket_rules_scanner import BucketsAclScanner
 from google.cloud.security.scanner.scanners.cloudsql_rules_scanner import CloudSqlAclScanner
+from google.cloud.security.scanner.scanners.instance_network_interface_scanner import InstanceNetworkInterfaceScanner
 # pylint: enable=line-too-long
 
 
@@ -28,7 +29,8 @@ SCANNER_MAP = {
     'BucketsRulesEngine': BucketsAclScanner,
     'CloudSqlRulesEngine': CloudSqlAclScanner,
     'GroupsRulesEngine': GroupsScanner,
-    'IamRulesEngine': IamPolicyScanner
+    'IamRulesEngine': IamPolicyScanner,
+    'InstanceNetworkInterfaceRulesEngine': InstanceNetworkInterfaceScanner,
 }
 
 FLATTENING_MAP = {
@@ -36,7 +38,8 @@ FLATTENING_MAP = {
     'BucketsRulesEngine': 'buckets_acl_violations',
     'CloudSqlRulesEngine': 'cloudsql_acl_violations',
     'GroupsRulesEngine': 'groups_violations',
-    'IamRulesEngine': 'policy_violations'
+    'IamRulesEngine': 'policy_violations',
+    'InstanceNetworkInterfaceRulesEngine': 'instance_network_interface_violations',
 }
 
 RESOURCE_MAP = {
@@ -44,5 +47,6 @@ RESOURCE_MAP = {
     'buckets_acl_violations': 'violations',
     'cloudsql_acl_violations': 'violations',
     'groups_violations': 'groups_violations',
-    'policy_violations': 'violations'
+    'policy_violations': 'violations',
+    'instance_network_interface_violations': 'instance_network_interface_violations',
 }
